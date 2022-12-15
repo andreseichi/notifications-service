@@ -19,14 +19,18 @@ export class NotificationsController {
     private getRecipientNotifications: GetRecipientNotifications,
   ) {}
 
-  @Get(':id/cancel')
-  async cancel(@Param('id') id: string) {
-    await this.cancelNotification.execute({
-      notificationId: id,
+  @Get('from/:recipientId')
+  async getFromRecipient(@Param('recipientId') recipientId: string) {
+    const { notifications } = await this.getRecipientNotifications.execute({
+      recipientId,
     });
+
+    return {
+      notification: notifications.map(NotificationViewModel.toHTTP),
+    };
   }
 
-  @Get('/count/from/:recipientId')
+  @Get('count/from/:recipientId')
   async countFromRecipient(
     @Param('recipientId') recipientId: string,
   ): Promise<{ count: number }> {
@@ -37,15 +41,11 @@ export class NotificationsController {
     return { count };
   }
 
-  @Get('/from/:recipientId')
-  async getFromRecipient(@Param('recipientId') recipientId: string) {
-    const { notifications } = await this.getRecipientNotifications.execute({
-      recipientId,
+  @Patch(':id/cancel')
+  async cancel(@Param('id') id: string) {
+    await this.cancelNotification.execute({
+      notificationId: id,
     });
-
-    return {
-      notification: notifications.map(NotificationViewModel.toHTTP),
-    };
   }
 
   @Patch(':id/read')
